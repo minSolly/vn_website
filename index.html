@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VNEngine — a small C++ engine for 2D sprite games</title>
+<meta name="description" content="VNEngine is an open-source C++ engine for 2D sprite games. One header, seven source files, four SDL2 dependencies, no editor.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="brand-mark"></span>VNEngine</a>
+    <ul class="nav-links">
+      <li><a href="#engine">Engine</a></li>
+      <li><a href="#footprint">Footprint</a></li>
+      <li><a href="#code">Code</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#start">Get started</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#" class="btn btn-ghost">GitHub</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+
+  <header class="hero" id="engine">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">c++17, built on SDL2</span>
+        <h1>A 2D engine with nothing to hide.</h1>
+        <p>VNEngine wraps SDL2 in plain C++: sprites, timers, scenes, and six easing curves. No editor, no plugin marketplace, no runtime to license — just source you can read in an afternoon and ship on top of.</p>
+        <div class="hero-actions">
+          <a href="#" class="btn btn-primary">Browse the source</a>
+          <a href="#start" class="btn btn-ghost">Read the docs</a>
+        </div>
+      </div>
+      <div class="hero-demo tick-panel">
+        <div class="demo-label">this is Lerp from vn_math.cpp, running live</div>
+        <div class="demo-canvas-wrap" id="canvasWrap">
+          <canvas id="curveCanvas"></canvas>
+          <div class="coord-readout" id="coordReadout">x 0 y 0</div>
+        </div>
+        <div class="demo-chips" id="chips">
+          <button class="chip is-active" data-curve="linear">linear</button>
+          <button class="chip" data-curve="easeIn">easeIn</button>
+          <button class="chip" data-curve="easeOut">easeOut</button>
+          <button class="chip" data-curve="easeInOut">easeInOut</button>
+          <button class="chip" data-curve="smoothstep">smoothstep</button>
+          <button class="chip" data-curve="bounce">bounce</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="footprint">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">footprint</span>
+        <h2>Four libraries. No more.</h2>
+        <p>The entire dependency tree is SDL2 and its three companion libraries — image loading, audio mixing, and font rendering. Nothing else links against your game.</p>
+      </div>
+      <div class="footprint-grid">
+        <div class="dep-stack">
+          <div class="dep-row"><span>SDL2</span><span>window, input, rendering</span></div>
+          <div class="dep-row"><span>SDL2_image</span><span>PNG / JPG loading</span></div>
+          <div class="dep-row"><span>SDL2_mixer</span><span>32-channel audio</span></div>
+          <div class="dep-row"><span>SDL2_ttf</span><span>text rendering</span></div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat"><span class="stat-num">1</span><span class="stat-label">header, vn.hpp</span></div>
+          <div class="stat"><span class="stat-num">7</span><span class="stat-label">source files</span></div>
+          <div class="stat"><span class="stat-num">642</span><span class="stat-label">lines, engine total</span></div>
+          <div class="stat"><span class="stat-num">4</span><span class="stat-label">external dependencies</span></div>
+          <div class="stat"><span class="stat-num">0</span><span class="stat-label">custom asset formats</span></div>
+          <div class="stat"><span class="stat-num">MIT</span><span class="stat-label">license</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="code">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">what's inside</span>
+        <h2>Four files, in their own words</h2>
+        <p>No paraphrasing — this is the actual engine source, unedited.</p>
+      </div>
+      <div class="code-tabs" id="codeTabs">
+        <button class="code-tab is-active" data-tab="tween">vn_math.cpp</button>
+        <button class="code-tab" data-tab="timer">vn_timer.cpp</button>
+        <button class="code-tab" data-tab="scene">vn_core.cpp</button>
+        <button class="code-tab" data-tab="sprite">vn_render.cpp</button>
+      </div>
+      <div class="code-frame">
+        <div class="code-frame-head">
+          <span id="codeFrameLabel">Lerp::easeInOut, Lerp::bounce</span>
+          <span>vn::Lerp</span>
+        </div>
+        <div class="code-body is-active" data-tab="tween"><pre>f32 Lerp::easeInOut(f32 a, f32 b, f32 t) {
+    return t &lt; 0.5f
+        ? a + (b - a) * (2 * t * t)
+        : a + (b - a) * (1 - std::pow(-2 * t + 2, 2) / 2);
+}
+
+f32 Lerp::bounce(f32 a, f32 b, f32 t) {
+    const f32 n1 = 7.5625f, d1 = 2.75f;
+    if (t &lt; 1 / d1) t = n1 * t * t;
+    else if (t &lt; 2 / d1) { t -= 1.5f / d1; t = n1 * t * t + 0.75f; }
+    else if (t &lt; 2.5f / d1) { t -= 2.25f / d1; t = n1 * t * t + 0.9375f; }
+    else { t -= 2.625f / d1; t = n1 * t * t + 0.984375f; }
+    return a + (b - a) * t;
+}</pre></div>
+        <div class="code-body" data-tab="timer"><pre>void Timer::update(f32 dt) {
+    if (paused) return;
+    wasDone = finished;
+    elapsed += dt;
+    if (elapsed >= duration) {
+        if (repeating) { elapsed -= duration; finished = true; }
+        else finished = true;
+    }
+}
+
+bool Timer::justFinished() {
+    if (repeating) {
+        bool r = finished && !wasDone;
+        if (r) finished = false;
+        return r;
+    }
+    return finished && !wasDone;
+}</pre></div>
+        <div class="code-body" data-tab="scene"><pre>void SceneManager::update(Engine& e, f32 dt) {
+    if (next && next != current) {
+        if (current) current->onExit(e);
+        current = next;
+        next = nullptr;
+        if (current) current->onEnter(e);
+    }
+    if (current) current->update(e, dt);
+}</pre></div>
+        <div class="code-body" data-tab="sprite"><pre>void Engine::drawImage(Image& img, f32 x, f32 y, f32 scale, f32 angle, Color tint) {
+    if (!img.tex) return;
+    SDL_Rect dst = { (int)x, (int)y, (int)(img.w * scale), (int)(img.h * scale) };
+    SDL_SetTextureColorMod(img.tex, tint.r, tint.g, tint.b);
+    SDL_SetTextureAlphaMod(img.tex, tint.a);
+    SDL_RenderCopyEx(renderer, img.tex, nullptr, &dst, angle, nullptr, SDL_FLIP_NONE);
+}</pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">architecture</span>
+        <h2>One loop, one manager, no surprises</h2>
+        <p><code style="font-family:var(--mono); color:var(--text-dim);">Engine::run</code> polls input, ticks the clock, and calls your two callbacks. Scenes sit on top as an optional layer with four lifecycle hooks.</p>
+      </div>
+      <div class="arch-diagram tick-panel">
+        <svg viewBox="0 0 960 220" xmlns="http://www.w3.org/2000/svg">
+          <g font-family="IBM Plex Mono" font-size="12.5" fill="#8ea0bd">
+            <rect x="10" y="70" width="150" height="60" fill="none" stroke="#24334d"/>
+            <text x="85" y="95" text-anchor="middle" fill="#e8edf6">handleEvents()</text>
+            <text x="85" y="112" text-anchor="middle" font-size="10.5">keys, mouse, quit</text>
+
+            <rect x="210" y="70" width="150" height="60" fill="none" stroke="#24334d"/>
+            <text x="285" y="95" text-anchor="middle" fill="#e8edf6">time.tick()</text>
+            <text x="285" y="112" text-anchor="middle" font-size="10.5">delta, clamped 0.1s</text>
+
+            <rect x="410" y="70" width="150" height="60" fill="none" stroke="#ff7a29"/>
+            <text x="485" y="95" text-anchor="middle" fill="#ff7a29">update(dt)</text>
+            <text x="485" y="112" text-anchor="middle" font-size="10.5">your game logic</text>
+
+            <rect x="610" y="70" width="150" height="60" fill="none" stroke="#24334d"/>
+            <text x="685" y="95" text-anchor="middle" fill="#e8edf6">draw()</text>
+            <text x="685" y="112" text-anchor="middle" font-size="10.5">sprites, text, debug</text>
+
+            <rect x="800" y="70" width="150" height="60" fill="none" stroke="#24334d"/>
+            <text x="875" y="95" text-anchor="middle" fill="#e8edf6">present()</text>
+            <text x="875" y="112" text-anchor="middle" font-size="10.5">SDL_RenderPresent</text>
+
+            <path d="M160 100 H210 M360 100 H410 M560 100 H610 M760 100 H800" stroke="#24334d" stroke-width="1.5" fill="none"/>
+            <path d="M875 130 V170 H85 V130" stroke="#24334d" stroke-width="1.5" fill="none" stroke-dasharray="3 4"/>
+            <text x="480" y="185" text-anchor="middle" font-size="10.5" fill="#56698c">while (!shouldQuit)</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">built for sprites</span>
+        <h2>Everything a 2D game actually needs</h2>
+      </div>
+      <div class="feature-grid">
+        <div class="feature">
+          <span class="eyebrow">rendering</span>
+          <h3>Logical resolution scaling</h3>
+          <p>Design at one resolution; SDL scales and letterboxes the window for you.</p>
+        </div>
+        <div class="feature">
+          <span class="eyebrow">motion</span>
+          <h3>Six easing curves</h3>
+          <p>Linear, easeIn, easeOut, easeInOut, smoothstep, and bounce, on floats and Vec2.</p>
+        </div>
+        <div class="feature">
+          <span class="eyebrow">timing</span>
+          <h3>Repeating, pausable timers</h3>
+          <p>Query progress, remaining time, or a single justFinished() edge per cycle.</p>
+        </div>
+        <div class="feature">
+          <span class="eyebrow">structure</span>
+          <h3>Scene lifecycle hooks</h3>
+          <p>onEnter, update, draw, onExit — swap scenes without tearing down the engine.</p>
+        </div>
+        <div class="feature">
+          <span class="eyebrow">input</span>
+          <h3>Just-pressed detection</h3>
+          <p>Held and edge-triggered states for both keyboard and mouse, out of the box.</p>
+        </div>
+        <div class="feature">
+          <span class="eyebrow">audio</span>
+          <h3>32-channel mixer</h3>
+          <p>Independent sound effects on top of looping music, with per-channel volume.</p>
+        </div>
+        <div class="feature">
+          <span class="eyebrow">debugging</span>
+          <h3>Toggleable debug grid</h3>
+          <p>A 50/100px overlay with a live mouse crosshair, one call away.</p>
+        </div>
+        <div class="feature">
+          <span class="eyebrow">rendering</span>
+          <h3>Tinted, rotated draws</h3>
+          <p>Color and alpha modulation plus rotation, on every sprite call.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap start-grid">
+      <div>
+        <span class="eyebrow">get started</span>
+        <h2 style="font-size: clamp(26px, 3vw, 34px); margin: 12px 0 30px;">Three commands to a running window</h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-num">1</span>
+            <div><h3>Clone it</h3><p>Pull the repository — no package manager, no account required.</p></div>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <div><h3>Configure with CMake</h3><p>Points at your local SDL2, SDL2_image, SDL2_mixer, and SDL2_ttf.</p></div>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <div><h3>Build and run</h3><p>Produces a single binary that opens straight into your update/draw loop.</p></div>
+          </li>
+        </ol>
+      </div>
+      <div class="terminal">
+        <div class="terminal-head"><span></span><span></span><span></span></div>
+        <div class="terminal-body">
+<span class="prompt">$ </span><span class="cmd">git clone https://github.com/vnengine/vnengine.git</span>
+<span class="prompt">$ </span><span class="cmd">cd vnengine && cmake -B build -DCMAKE_BUILD_TYPE=Release</span>
+<span class="out">-- SDL2, SDL2_image, SDL2_mixer, SDL2_ttf found</span>
+<span class="prompt">$ </span><span class="cmd">cmake --build build</span>
+<span class="out">-- built ./build/vnengine_demo</span>
+<span class="prompt">$ </span><span class="cmd">./build/vnengine_demo</span>
+</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <a href="#top" class="brand"><span class="brand-mark"></span>VNEngine</a>
+      <p style="margin-top: 10px; max-width: 32ch; font-size: 13.5px;">A small, open-source C++ engine for 2D sprite games.</p>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">GitHub</a></li>
+      <li><a href="#">Issues</a></li>
+      <li><a href="#start">Docs</a></li>
+      <li><a href="#">Changelog</a></li>
+    </ul>
+    <div class="footer-meta">v0.9 · MIT licensed</div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
